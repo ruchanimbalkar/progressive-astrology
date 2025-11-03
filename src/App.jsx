@@ -3,16 +3,44 @@ import { useState } from "react";
 import "./App.css";
 //import components
 import Card from "./components/Card.jsx";
+//import nodemodules
 import { birthStoneData, horoscopeData } from "./data.js";
+import { getSign, getZodiac } from "horoscope";
+import moment from "moment";
 
 function App() {
+  const [date, setDate] = useState(null);
   const [horoscope, setHoroscope] = useState("");
   const [sign, setSign] = useState("");
   const [month, setMonth] = useState("");
+  const [leapYear, setLeapYear] = useState("");
+  const [signMessage, setSignMessage] = useState("");
   const [message, setMessage] = useState("");
-  const handleChange = (event) => setMonth(event.target.value);
 
-  const handleSubmit = (event) => {
+  const handleAstroZodiacFormChange = (event) => {
+    setDate(event.target.value);
+  };
+
+  const handleAstroZodiacFormSubmit = (event) => {
+    event.preventDefault();
+    //console.log(date); //yyyy-mm-dd
+    //console.log('typeof date', typeof date);
+    let year = Number(date.slice(0, 4)); // Get first 4 characters : year
+    let month = Number(date.slice(5, 7)); //Get month (characters 5 and 6)
+    let day = Number(date.slice(8, 10)); //Get day (last two charcters)
+    //console.log(year, month, day);
+    //find astrological sign from {month, day}
+    let astroSign = getSign({ month: month, day: day });
+    //find zodiac sign from year
+    let zodiacSign = getZodiac(year);
+    let result = moment([year]).isLeapYear();
+    let text = result ? `Also ${year} is a leap year` : "";
+    setLeapYear(text);
+    setSignMessage(`Astro sign : ${astroSign} Zodiac sign : ${zodiacSign} `);
+  };
+  const handleBirthStoneFormChange = (event) => setMonth(event.target.value);
+
+  const handleBirthStoneFormSubmit = (event) => {
     console.log("inside handle submit");
     event.preventDefault();
     if (month != "") {
@@ -22,9 +50,9 @@ function App() {
     }
   };
 
-  const handleZodiacFormChange = (event) => setSign(event.target.value);
+  const handleHoroscopeFormChange = (event) => setSign(event.target.value);
 
-  const handleZodiacFormSubmit = (event) => {
+  const handleHoroscopeFormSubmit = (event) => {
     event.preventDefault();
     setHoroscope(horoscopeData.horoscopes.astroSigns[sign].dailyHoroscope);
     //getHoroscope();
@@ -55,15 +83,21 @@ function App() {
       <h2> Welcome to Progressive Astrology </h2>
       <main className="main-card">
         <Card
+          heading="Find Astro Sign & Zodiac Sign"
+          handleChange={handleAstroZodiacFormChange}
+          handleSubmit={handleAstroZodiacFormSubmit}
+          result={signMessage}
+        />
+        <Card
           heading="Find your birthstone"
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
+          handleChange={handleBirthStoneFormChange}
+          handleSubmit={handleBirthStoneFormSubmit}
           result={message}
         />
         <Card
           heading="Get your weekly horoscope"
-          handleChange={handleZodiacFormChange}
-          handleSubmit={handleZodiacFormSubmit}
+          handleChange={handleHoroscopeFormChange}
+          handleSubmit={handleHoroscopeFormSubmit}
           result={horoscope}
         />
       </main>
